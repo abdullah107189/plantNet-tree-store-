@@ -63,7 +63,6 @@ const AuthProvider = ({ children }) => {
             image: currentUser?.photoURL,
           }
           const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/user/${currentUser?.email}`, userInfo)
-          console.log(data);
           if (data.insertedId) {
             toast.success('added user data on db')
           }

@@ -11,16 +11,9 @@ const AddPlantForm = () => {
   const { user } = useAuth()
   const axiosSecure = useAxiosSecure()
   const [loading, setLoading] = useState(false)
-  const [imgLoading, setImgLoading] = useState(false)
-  const [image, setImage] = useState(null)
   const navigate = useNavigate()
 
-  const handleSetImage = async (img) => {
-    setImgLoading(true)
-    const imageUrl = await useImageApi(img)
-    setImage(imageUrl)
-    setImgLoading(false)
-  }
+  const [uploadImage, setUploadImage] = useState({ name: 'Upload Button' })
   const handleSubmit = async e => {
     e.preventDefault()
     setLoading(true)
@@ -28,13 +21,18 @@ const AddPlantForm = () => {
     const name = form.name.value
     const description = form.description.value
     const category = form.category.value
+    if (!uploadImage?.image) {
+      setLoading(false)
+      return toast.error('please add image..')
+    }
+    const imageUrl = await useImageApi(uploadImage?.image)
     const price = parseFloat(form.price.value)
     const quantity = parseInt(form.quantity.value)
     const sellerEmail = user?.email
     const sellerPhotoUrl = user?.photoURL
     const sellerName = user?.displayName
     const sellerInfo = { sellerEmail, sellerPhotoUrl, sellerName }
-    const plantData = { name, description, category, price, image: image, quantity, sellerInfo }
+    const plantData = { name, description, category, price, image: imageUrl, quantity, sellerInfo }
 
     try {
       axiosSecure.post('http://localhost:5000/plants', plantData)
@@ -141,24 +139,35 @@ const AddPlantForm = () => {
             {/* Image */}
             <div className=' p-4  w-full  m-auto rounded-lg flex-grow'>
               <div className='file_upload px-5 py-3 relative border-4 border-dotted border-gray-300 rounded-lg'>
-                {image && <img className="h-20 mx-auto mb-2" src={image} alt="" />}
+                {/* show image and info  */}
+                {uploadImage && uploadImage?.image?.size && (
+                  <div className='flex gap-5 relative items-center'>
+                    <img className='w-20' src={uploadImage?.url} alt='' />
+                    <button onClick={() => setUploadImage({ name: "Upload Button" })} className="absolute p-3 flex items-center justify-center hover:bg-red-400 -top-3 -left-3 w-6 h-6 rounded-full text-white bg-red-300">X</button>
+                    <p>Image Size: {uploadImage?.image?.size} Bytes</p>
+                  </div>
+                )}
+                {/* {image && <img className="h-20 mx-auto mb-2" src={image} alt="" />} */}
+
                 <div className='flex flex-col w-max mx-auto text-center'>
                   <label>
                     <input
                       className='text-sm cursor-pointer w-36 hidden'
                       type='file'
                       name='image'
-                      onChange={(e) => handleSetImage(e.target.files[0])}
+                      // onChange={(e) => handleSetImage(e.target.files[0])}
+                      onChange={e =>
+                        setUploadImage({
+                          image: e.target.files[0],
+                          url: URL.createObjectURL(e.target.files[0]),
+                        })
+                      }
                       id='image'
                       accept='image/*'
                       hidden
                     />
                     <div className='bg-lime-500 text-white border border-gray-300 rounded font-semibold cursor-pointer p-1 px-3 hover:bg-lime-500'>
-                      {imgLoading ? (
-                        <TbFidgetSpinner className='animate-spin m-auto' />
-                      ) : (
-                        'Update'
-                      )}
+                      {uploadImage?.image?.name ? uploadImage?.image?.name : 'Update'}
                     </div>
                   </label>
                 </div>
