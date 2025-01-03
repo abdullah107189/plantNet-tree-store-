@@ -103,6 +103,7 @@ const AddPlantForm = () => {
             </div>
           </div>
           <div className='space-y-6 flex flex-col'>
+            
             {/* Price & Quantity */}
             <div className='flex justify-between gap-2'>
               {/* Price */}

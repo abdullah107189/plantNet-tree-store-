@@ -3,28 +3,31 @@ import { Helmet } from 'react-helmet-async'
 import Heading from '../../components/Shared/Heading'
 import Button from '../../components/Shared/Button/Button'
 import PurchaseModal from '../../components/Modal/PurchaseModal'
-import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import useAxiosSecure from '../../hooks/useAxiosSecure'
-
+import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
+import LoadingSpinner from '../../components/Shared/LoadingSpinner'
 const PlantDetails = () => {
   let [isOpen, setIsOpen] = useState(false)
-
-  const [plant, setPlant] = useState({})
   const closeModal = () => {
     setIsOpen(false)
   }
 
   const { id } = useParams()
   const axiosSecure = useAxiosSecure()
-
-  useEffect(() => {
-    axiosSecure.get(`/plants/${id}`)
-      .then(res => {
-        setPlant(res.data)
-      })
-  }, [])
+  const { data: plant = [], isLoading, } = useQuery({
+    queryKey: ['plant', id],
+    queryFn: async () => {
+      const { data } = await axiosSecure.get(`/plants/${id}`)
+      return data
+    }
+  })
+  if (isLoading) {
+    return <LoadingSpinner></LoadingSpinner>
+  }
   const { name, category, price, image, quantity, sellerInfo, description } = plant || {}
+
   return (
     <Container>
       <Helmet>
@@ -46,7 +49,7 @@ const PlantDetails = () => {
         <div className='md:gap-10 flex-1'>
           {/* Plant Info */}
           <Heading
-            title={'Money Plant'}
+            title={name}
             subtitle={`Category: ${category}`}
           />
           <hr className='my-6' />
@@ -94,12 +97,12 @@ const PlantDetails = () => {
           <div className='flex justify-between'>
             <p className='font-bold text-3xl text-gray-500'>Price: {price}$</p>
             <div>
-              <Button label='Purchase' />
+              <Button onClick={() => setIsOpen(true)} disabled={quantity > 0 ? false : true} label={quantity > 0 ? 'Purchase' : 'Out of Stock'} />
             </div>
           </div>
           <hr className='my-6' />
 
-          <PurchaseModal closeModal={closeModal} isOpen={isOpen} />
+          <PurchaseModal plant={plant} closeModal={closeModal} isOpen={isOpen} />
 
           <div className='md:col-span-3 order-first md:order-last mb-10'>
             {/* RoomReservation */}

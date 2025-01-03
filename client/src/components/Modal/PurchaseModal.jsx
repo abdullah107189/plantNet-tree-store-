@@ -6,10 +6,22 @@ import {
   DialogPanel,
   DialogTitle,
 } from '@headlessui/react'
-import { Fragment } from 'react'
+import { Fragment, useState } from 'react'
+import useAuth from '../../hooks/useAuth'
+import toast from 'react-hot-toast'
 
-const PurchaseModal = ({ closeModal, isOpen }) => {
-  // Total Price Calculation
+const PurchaseModal = ({ closeModal, isOpen, plant }) => {
+  const { name, category, price, quantity, } = plant || {}
+  const { user } = useAuth()
+  const [totalQuantity, setTotalQuantity] = useState(1)
+
+  const handleChangeValue = value => {
+    if (value > quantity) {
+      setTotalQuantity(quantity)
+      toast.error('Plant exceeds available stock!')
+      return
+    }
+  }
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -45,20 +57,48 @@ const PurchaseModal = ({ closeModal, isOpen }) => {
                   Review Info Before Purchase
                 </DialogTitle>
                 <div className='mt-2'>
-                  <p className='text-sm text-gray-500'>Plant: Money Plant</p>
+                  <p className='text-sm text-gray-500'>Plant: {name}</p>
                 </div>
                 <div className='mt-2'>
-                  <p className='text-sm text-gray-500'>Category: Indoor</p>
+                  <p className='text-sm text-gray-500'>Category: {category}</p>
                 </div>
                 <div className='mt-2'>
-                  <p className='text-sm text-gray-500'>Customer: PH</p>
+                  <p className='text-sm text-gray-500'>Customer: {user?.displayName}</p>
                 </div>
 
                 <div className='mt-2'>
-                  <p className='text-sm text-gray-500'>Price: $ 120</p>
+                  <p className='text-sm text-gray-500'>Price: $ {price}</p>
                 </div>
                 <div className='mt-2'>
-                  <p className='text-sm text-gray-500'>Available Quantity: 5</p>
+                  <p className='text-sm text-gray-500'>Available Quantity: {quantity}</p>
+                </div>
+                <div className='flex items-center space-x-3 text-sm'>
+                  <label htmlFor='quantity' className='block text-gray-600'>
+                    Quantity :
+                  </label>
+                  <input
+                    value={totalQuantity}
+                    onChange={(e) => handleChangeValue(parseInt(e.target.value) || 0)}
+                    className='w-auto p-2 mt-1 text-gray-800 border border-lime-300 focus:outline-lime-500 rounded-md bg-white'
+                    name='quantity'
+                    id='quantity'
+                    type='number'
+                    placeholder='Available quantity'
+                    required
+                  />
+                </div>
+                <div className='flex items-center space-x-3 text-sm'>
+                  <label htmlFor='address' className='block text-gray-600'>
+                    Address :
+                  </label>
+                  <input
+                    className='w-auto p-2 mt-1 text-gray-800 border border-lime-300 focus:outline-lime-500 rounded-md bg-white'
+                    name='address'
+                    id='address'
+                    type='text'
+                    placeholder='Write your address here...'
+                    required
+                  />
                 </div>
               </DialogPanel>
             </TransitionChild>
