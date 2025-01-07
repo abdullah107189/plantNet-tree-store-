@@ -13,7 +13,7 @@ import Button from '../Shared/Button/Button'
 import useAxiosSecure from '../../hooks/useAxiosSecure'
 
 
-const PurchaseModal = ({ closeModal, isOpen, plant, setError, error, totalPrice, setTotalPrice }) => {
+const PurchaseModal = ({ closeModal, isOpen, plant, setError, error, totalPrice, setTotalPrice, refetch }) => {
   const { name, category, price, quantity, image, _id, sellerInfo } = plant || {}
   const [totalQuantity, setTotalQuantity] = useState(1)
   const { user } = useAuth()
@@ -61,7 +61,8 @@ const PurchaseModal = ({ closeModal, isOpen, plant, setError, error, totalPrice,
       if (data.insertedId) {
         toast.success('Order proccess')
       }
-      
+      await axiosSecure.patch(`/plant/quantity/${_id}`, { quantityCount: totalQuantity })
+      refetch()
     } catch (error) {
       console.log(error);
     }
@@ -128,7 +129,6 @@ const PurchaseModal = ({ closeModal, isOpen, plant, setError, error, totalPrice,
                     className={`${error && 'text-red-400'} w-auto p-2 mt-1 text-gray-800 border border-lime-300 focus:outline-lime-500 rounded-md bg-white`}
                     name='quantity'
                     id='quantity'
-                    min="0"
                     type='number'
                     placeholder='Available quantity'
                     required

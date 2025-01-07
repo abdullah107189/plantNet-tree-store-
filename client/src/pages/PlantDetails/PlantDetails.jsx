@@ -14,7 +14,7 @@ const PlantDetails = () => {
   const [error, setError] = useState(false)
   const { id } = useParams()
   const axiosSecure = useAxiosSecure()
-  const { data: plant = [], isLoading, } = useQuery({
+  const { data: plant = [], isLoading,refetch } = useQuery({
     queryKey: ['plant', id],
     queryFn: async () => {
       const { data } = await axiosSecure.get(`/plants/${id}`)
@@ -28,7 +28,7 @@ const PlantDetails = () => {
       setTotalPrice(price);
     }
   }, [price]);
-  
+
   const closeModal = () => {
     setError(false)
     setIsOpen(false)
@@ -120,6 +120,7 @@ const PlantDetails = () => {
             isOpen={isOpen}
             totalPrice={totalPrice}
             setTotalPrice={setTotalPrice}
+            refetch={refetch}
           />
 
 

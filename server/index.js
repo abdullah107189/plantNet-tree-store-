@@ -115,11 +115,25 @@ async function run() {
       res.send(result)
     })
 
-    app.post('/orders', async (req, res) => {
+    app.post('/orders', verifyToken, async (req, res) => {
       const order = req.body;
       const result = await ordersCollection.insertOne(order)
       res.send(result)
     })
+
+    // manage plant quantity
+    app.patch('/plant/quantity/:id', verifyToken, async (req, res) => {
+      const id = req.params.id;
+      const { quantityCount } = req.body;
+      const filter = { _id: new ObjectId(id) }
+      const updateDoc = {
+        $inc: { quantity: -quantityCount }
+      }
+      const result = await plantsCollection.updateOne(filter, updateDoc)
+      console.log(result);
+      res.send(result)
+    })
+
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 })
     console.log(
