@@ -103,7 +103,7 @@ const AddPlantForm = () => {
             </div>
           </div>
           <div className='space-y-6 flex flex-col'>
-            
+
             {/* Price & Quantity */}
             <div className='flex justify-between gap-2'>
               {/* Price */}
@@ -142,10 +142,12 @@ const AddPlantForm = () => {
               <div className='file_upload px-5 py-3 relative border-4 border-dotted border-gray-300 rounded-lg'>
                 {/* show image and info  */}
                 {uploadImage && uploadImage?.image?.size && (
-                  <div className='flex gap-5 relative items-center'>
+                  <div className='flex gap-5 relative items-center '>
                     <img className='w-20' src={uploadImage?.url} alt='' />
                     <button onClick={() => setUploadImage({ name: "Upload Button" })} className="absolute p-3 flex items-center justify-center hover:bg-red-400 -top-3 -left-3 w-6 h-6 rounded-full text-white bg-red-300">X</button>
-                    <p>Image Size: {uploadImage?.image?.size} Bytes</p>
+                    <div className="w-full overflow-hidden">
+                      <p>Image Size: {uploadImage?.image?.size} Bytes</p>
+                    </div>
                   </div>
                 )}
                 {/* {image && <img className="h-20 mx-auto mb-2" src={image} alt="" />} */}

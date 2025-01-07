@@ -9,11 +9,9 @@ import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import LoadingSpinner from '../../components/Shared/LoadingSpinner'
 const PlantDetails = () => {
-  let [isOpen, setIsOpen] = useState(false)
-  const closeModal = () => {
-    setIsOpen(false)
-  }
 
+  let [isOpen, setIsOpen] = useState(false)
+  const [error, setError] = useState(false)
   const { id } = useParams()
   const axiosSecure = useAxiosSecure()
   const { data: plant = [], isLoading, } = useQuery({
@@ -23,10 +21,17 @@ const PlantDetails = () => {
       return data
     }
   })
+  const { name, category, price, image, quantity, sellerInfo, description } = plant || {}
+  const [totalPrice, setTotalPrice] = useState(price)
+  const closeModal = () => {
+    setError(false)
+    setIsOpen(false)
+  }
+
+
   if (isLoading) {
     return <LoadingSpinner></LoadingSpinner>
   }
-  const { name, category, price, image, quantity, sellerInfo, description } = plant || {}
 
   return (
     <Container>
@@ -102,7 +107,14 @@ const PlantDetails = () => {
           </div>
           <hr className='my-6' />
 
-          <PurchaseModal plant={plant} closeModal={closeModal} isOpen={isOpen} />
+          <PurchaseModal plant={plant}
+            closeModal={closeModal}
+            setError={setError}
+            error={error}
+            isOpen={isOpen}
+            totalPrice={totalPrice}
+            setTotalPrice={setTotalPrice}
+          />
 
           <div className='md:col-span-3 order-first md:order-last mb-10'>
             {/* RoomReservation */}

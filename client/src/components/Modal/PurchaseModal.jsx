@@ -9,18 +9,27 @@ import {
 import { Fragment, useState } from 'react'
 import useAuth from '../../hooks/useAuth'
 import toast from 'react-hot-toast'
+import Button from '../Shared/Button/Button'
 
-const PurchaseModal = ({ closeModal, isOpen, plant }) => {
+const PurchaseModal = ({ closeModal, isOpen, plant, setError, error, totalPrice, setTotalPrice }) => {
   const { name, category, price, quantity, } = plant || {}
-  const { user } = useAuth()
   const [totalQuantity, setTotalQuantity] = useState(1)
+  const { user } = useAuth()
 
   const handleChangeValue = value => {
     if (value > quantity) {
-      setTotalQuantity(quantity)
+      setError(true)
       toast.error('Plant exceeds available stock!')
       return
     }
+    if (1 > value) {
+      setError(true)
+      toast.error('minimum 1pis')
+      return
+    }
+    setError(false)
+    setTotalQuantity(value)
+    setTotalPrice(value * price)
   }
 
   return (
@@ -77,11 +86,13 @@ const PurchaseModal = ({ closeModal, isOpen, plant }) => {
                     Quantity :
                   </label>
                   <input
-                    value={totalQuantity}
+                    defaultValue={totalQuantity}
                     onChange={(e) => handleChangeValue(parseInt(e.target.value) || 0)}
-                    className='w-auto p-2 mt-1 text-gray-800 border border-lime-300 focus:outline-lime-500 rounded-md bg-white'
+
+                    className={`${error && 'text-red-400'} w-auto p-2 mt-1 text-gray-800 border border-lime-300 focus:outline-lime-500 rounded-md bg-white`}
                     name='quantity'
                     id='quantity'
+                    min="0"
                     type='number'
                     placeholder='Available quantity'
                     required
@@ -92,7 +103,7 @@ const PurchaseModal = ({ closeModal, isOpen, plant }) => {
                     Address :
                   </label>
                   <input
-                    className='w-auto p-2 mt-1 text-gray-800 border border-lime-300 focus:outline-lime-500 rounded-md bg-white'
+                    className='mb-3 w-auto p-2 mt-1 text-gray-800 border border-lime-300 focus:outline-lime-500 rounded-md bg-white'
                     name='address'
                     id='address'
                     type='text'
@@ -100,6 +111,7 @@ const PurchaseModal = ({ closeModal, isOpen, plant }) => {
                     required
                   />
                 </div>
+                <Button label={`Pay $${totalPrice || price}`} />
               </DialogPanel>
             </TransitionChild>
           </div>
