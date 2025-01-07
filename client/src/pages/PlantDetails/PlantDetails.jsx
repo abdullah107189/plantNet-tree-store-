@@ -6,7 +6,7 @@ import PurchaseModal from '../../components/Modal/PurchaseModal'
 import { useParams } from 'react-router-dom'
 import useAxiosSecure from '../../hooks/useAxiosSecure'
 import { useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import LoadingSpinner from '../../components/Shared/LoadingSpinner'
 const PlantDetails = () => {
 
@@ -23,12 +23,16 @@ const PlantDetails = () => {
   })
   const { name, category, price, image, quantity, sellerInfo, description } = plant || {}
   const [totalPrice, setTotalPrice] = useState(price)
+  useEffect(() => {
+    if (price !== undefined) {
+      setTotalPrice(price);
+    }
+  }, [price]);
+  
   const closeModal = () => {
     setError(false)
     setIsOpen(false)
   }
-
-
   if (isLoading) {
     return <LoadingSpinner></LoadingSpinner>
   }
@@ -107,7 +111,9 @@ const PlantDetails = () => {
           </div>
           <hr className='my-6' />
 
-          <PurchaseModal plant={plant}
+          <PurchaseModal
+
+            plant={plant}
             closeModal={closeModal}
             setError={setError}
             error={error}
@@ -115,6 +121,7 @@ const PlantDetails = () => {
             totalPrice={totalPrice}
             setTotalPrice={setTotalPrice}
           />
+
 
           <div className='md:col-span-3 order-first md:order-last mb-10'>
             {/* RoomReservation */}

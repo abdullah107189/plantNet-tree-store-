@@ -10,11 +10,15 @@ import { Fragment, useState } from 'react'
 import useAuth from '../../hooks/useAuth'
 import toast from 'react-hot-toast'
 import Button from '../Shared/Button/Button'
+import useAxiosSecure from '../../hooks/useAxiosSecure'
+
 
 const PurchaseModal = ({ closeModal, isOpen, plant, setError, error, totalPrice, setTotalPrice }) => {
-  const { name, category, price, quantity, } = plant || {}
+  const { name, category, price, quantity, image, _id, sellerInfo } = plant || {}
   const [totalQuantity, setTotalQuantity] = useState(1)
   const { user } = useAuth()
+  const [address, setAddress] = useState('')
+  const axiosSecure = useAxiosSecure()
 
   const handleChangeValue = value => {
     if (value > quantity) {
@@ -32,6 +36,39 @@ const PurchaseModal = ({ closeModal, isOpen, plant, setError, error, totalPrice,
     setTotalPrice(value * price)
   }
 
+  const purchaseInfo = {
+    customer: {
+      name: user?.displayName,
+      email: user?.email,
+      photo: user?.photoURL
+    },
+    plantId: _id,
+    plantName: name,
+    plantCategory: category,
+    plantPrice: totalPrice,
+    plantQuantity: totalQuantity,
+    plantImage: image,
+    sellerEmail: sellerInfo?.sellerEmail,
+    status: 'pending',
+  }
+  const handlePurchase = async () => {
+    if (address === '') {
+      return toast.error('please fill up address input')
+    }
+    purchaseInfo.customer.address = address
+    try {
+      const { data } = await axiosSecure.post('/orders', purchaseInfo)
+      if (data.insertedId) {
+        toast.success('Order proccess')
+      }
+      
+    } catch (error) {
+      console.log(error);
+    }
+    finally {
+      closeModal()
+    }
+  }
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as='div' className='relative z-10' onClose={closeModal}>
@@ -88,7 +125,6 @@ const PurchaseModal = ({ closeModal, isOpen, plant, setError, error, totalPrice,
                   <input
                     defaultValue={totalQuantity}
                     onChange={(e) => handleChangeValue(parseInt(e.target.value) || 0)}
-
                     className={`${error && 'text-red-400'} w-auto p-2 mt-1 text-gray-800 border border-lime-300 focus:outline-lime-500 rounded-md bg-white`}
                     name='quantity'
                     id='quantity'
@@ -104,14 +140,15 @@ const PurchaseModal = ({ closeModal, isOpen, plant, setError, error, totalPrice,
                   </label>
                   <input
                     className='mb-3 w-auto p-2 mt-1 text-gray-800 border border-lime-300 focus:outline-lime-500 rounded-md bg-white'
+                    required
                     name='address'
                     id='address'
+                    onChange={(e) => setAddress(e.target.value)}
                     type='text'
                     placeholder='Write your address here...'
-                    required
                   />
                 </div>
-                <Button label={`Pay $${totalPrice || price}`} />
+                <Button onClick={handlePurchase} label={`Pay $${totalPrice || price}`} />
               </DialogPanel>
             </TransitionChild>
           </div>

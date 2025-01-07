@@ -50,6 +50,7 @@ async function run() {
     const database = client.db('plantNetDB')
     const usersCollection = database.collection('users')
     const plantsCollection = database.collection('plants')
+    const ordersCollection = database.collection('orders')
 
     // Generate jwt token
     app.post('/jwt', async (req, res) => {
@@ -86,7 +87,7 @@ async function run() {
       res.send(result)
     })
     app.get('/plants', async (req, res) => {
-      const result = await plantsCollection.find().toArray()
+      const result = await plantsCollection.find().limit(20).toArray()
       res.send(result)
     })
     app.get('/plants/:id', async (req, res) => {
@@ -114,6 +115,11 @@ async function run() {
       res.send(result)
     })
 
+    app.post('/orders', async (req, res) => {
+      const order = req.body;
+      const result = await ordersCollection.insertOne(order)
+      res.send(result)
+    })
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 })
     console.log(
